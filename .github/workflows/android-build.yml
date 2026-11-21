@@ -71,7 +71,7 @@ jobs:
       - name: Make Gradle wrapper executable
         run: chmod +x ./gradlew
 
-      - name: Build pinned miuix snapshot dependency
+      - name: Build pinned miuix Android publications
         run: |
           set -euo pipefail
           rm -rf ../miuix
@@ -83,7 +83,17 @@ jobs:
           sed -i 's|gradlePluginPortal()|gradlePluginPortal()\n        maven("https://maven.aliyun.com/repository/gradle-plugin")|g' settings.gradle.kts
           sed -i 's|google {|maven("https://maven.aliyun.com/repository/google")\n        google {|g' settings.gradle.kts
           sed -i 's|mavenCentral()|maven("https://repo.maven.apache.org/maven2")|g' build-logic/settings.gradle.kts
-          ./gradlew --no-daemon \
+          # The app only consumes the Android artifacts, so skip every ios/macos/js/desktop
+          # publication: publishing them costs tens of minutes and never gets used.
+          printf '%s\n' \
+            'gradle.projectsEvaluated {' \
+            '    rootProject.allprojects { p ->' \
+            '        p.tasks.matching { t ->' \
+            '            t.name.startsWith("publish") && t.name.endsWith("ToLocalRepository") && !t.name.contains("Android")' \
+            '        }.configureEach { enabled = false }' \
+            '    }' \
+            '}' > /tmp/android-only.gradle
+          ./gradlew --no-daemon -I /tmp/android-only.gradle \
             :miuix-core:publishAllPublicationsToLocalRepository \
             :miuix-ui:publishAllPublicationsToLocalRepository \
             :miuix-preference:publishAllPublicationsToLocalRepository \
@@ -93,7 +103,7 @@ jobs:
             :miuix-glass-icons:publishAllPublicationsToLocalRepository \
             :miuix-squircle:publishAllPublicationsToLocalRepository \
             :miuix-icons:publishAllPublicationsToLocalRepository
-          ls ../miuix/miuix-core/build/repository/local
+          find ../miuix -maxdepth 3 -path "*repository/local/top*" -type d | head -20
 
       - name: Diagnose dependency repositories
         run: |
