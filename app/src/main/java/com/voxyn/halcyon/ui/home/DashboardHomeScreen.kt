@@ -119,10 +119,19 @@ fun HomeScreen(
     var showNeteaseAccount by remember { mutableStateOf(false) }
     val installedSourcePlugins by com.voxyn.halcyon.data.sourceplugin.SourcePluginRegistry
         .plugins(context).collectAsState(initial = emptyList())
-    // Local-only build: online library sources are not offered anywhere in the UI.
     val librarySourceOptions = listOf(
-        SettingsManager.LIBRARY_SOURCE_LOCAL to stringResource(R.string.settings_library_source_local)
-    )
+        SettingsManager.LIBRARY_SOURCE_LOCAL to stringResource(R.string.settings_library_source_local),
+        SettingsManager.LIBRARY_SOURCE_NETEASE to stringResource(R.string.netease_title),
+        SettingsManager.LIBRARY_SOURCE_NAVIDROME to stringResource(R.string.remote_source_navidrome),
+        SettingsManager.LIBRARY_SOURCE_OPENSUBSONIC to stringResource(R.string.remote_source_opensubsonic),
+        SettingsManager.LIBRARY_SOURCE_EMBY to stringResource(R.string.remote_source_emby),
+        SettingsManager.LIBRARY_SOURCE_WEBDAV to stringResource(R.string.webdav_library_title),
+        SettingsManager.LIBRARY_SOURCE_SMB to stringResource(R.string.smb_title),
+        SettingsManager.LIBRARY_SOURCE_FTP to stringResource(R.string.ftp_library_title),
+        SettingsManager.LIBRARY_SOURCE_SFTP to stringResource(R.string.sftp_library_title)
+    ) + installedSourcePlugins.map {
+        com.voxyn.halcyon.data.sourceplugin.sourcePluginSourceKey(it.id) to it.name
+    }
     val initialSettings = remember(settingsManager) {
         runBlocking(Dispatchers.IO) {
             HomeInitialSettings(
@@ -529,8 +538,14 @@ fun HomeScreen(
                 }
                 tileOrder.mapNotNull { all[it] ?: customTiles[it] }
             }
-            // Local-only build: the online music section has no entries to show.
-            val onlineTiles: List<HomeTileSpec> = remember { emptyList() }
+            val onlineTiles = remember(context, onlineTileOrder, hiddenOnlineTiles) {
+                val all = mapOf(
+                    "musicfree" to HomeTileSpec("musicfree", "MusicFree", context.getString(R.string.home_import_api_source), Screen.MusicFreeOnline.route, onNavigateToMusicFreeOnline),
+                    "lx" to HomeTileSpec("lx", "LX Music", context.getString(R.string.home_import_api_source), Screen.LxOnline.route, onNavigateToLxOnline)
+                )
+                onlineTileOrder.mapNotNull { all[it] }.filterNot { it.id in hiddenOnlineTiles }
+            }
+
             sectionOrder.filterNot { it in hiddenSections }.forEach { section ->
                 when (section) {
                     "library" -> HomeTileSection(

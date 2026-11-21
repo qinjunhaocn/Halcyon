@@ -141,8 +141,10 @@ fun SettingsDetailScreen(
         HomePreferenceItem("lyricist", stringResource(R.string.settings_library_tile_lyricist), stringResource(R.string.settings_library_tile_lyricist_summary)),
         HomePreferenceItem("producer", stringResource(R.string.settings_library_tile_producer), stringResource(R.string.settings_library_tile_producer_summary))
     )
-    // Local-only build: no online home tiles to configure.
-    val homeOnlineTileItems: List<HomePreferenceItem> = emptyList()
+    val homeOnlineTileItems = listOf(
+        HomePreferenceItem("musicfree", "MusicFree", stringResource(R.string.home_import_api_source)),
+        HomePreferenceItem("lx", "LX Music", stringResource(R.string.home_import_api_source))
+    )
     val effectiveMode = if (showOnlyLyrics) SettingsDetailMode.Lyrics else mode
     var showHomeDisplayPage by remember(initialHomeDisplay) { mutableStateOf(initialHomeDisplay) }
     // Keep both viewports alive while the nested page is open. They are still scoped to this

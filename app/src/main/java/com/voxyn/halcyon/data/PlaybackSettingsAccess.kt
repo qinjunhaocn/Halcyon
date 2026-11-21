@@ -46,6 +46,14 @@ import com.voxyn.halcyon.data.SettingsManager.Companion.PAUSED_SWITCH_MODE_PLAY
 import com.voxyn.halcyon.data.SettingsManager.Companion.KEY_REPLAYGAIN_ENABLED
 import com.voxyn.halcyon.data.SettingsManager.Companion.KEY_REPLAYGAIN_MODE
 import com.voxyn.halcyon.data.SettingsManager.Companion.KEY_RESUME_PLAYBACK_POSITION
+import com.voxyn.halcyon.data.SettingsManager.Companion.KEY_PREFERENCE_SHUFFLE_FRESHNESS
+import com.voxyn.halcyon.data.SettingsManager.Companion.KEY_PREFERENCE_SHUFFLE_STRENGTH
+import com.voxyn.halcyon.data.SettingsManager.Companion.PREFERENCE_SHUFFLE_FRESHNESS_DEFAULT
+import com.voxyn.halcyon.data.SettingsManager.Companion.PREFERENCE_SHUFFLE_FRESHNESS_MAX
+import com.voxyn.halcyon.data.SettingsManager.Companion.PREFERENCE_SHUFFLE_FRESHNESS_MIN
+import com.voxyn.halcyon.data.SettingsManager.Companion.PREFERENCE_SHUFFLE_STRENGTH_DEFAULT
+import com.voxyn.halcyon.data.SettingsManager.Companion.PREFERENCE_SHUFFLE_STRENGTH_MAX
+import com.voxyn.halcyon.data.SettingsManager.Companion.PREFERENCE_SHUFFLE_STRENGTH_MIN
 import com.voxyn.halcyon.data.SettingsManager.Companion.KEY_SHUFFLE_MODE
 import com.voxyn.halcyon.data.SettingsManager.Companion.KEY_SHUFFLE_RESHUFFLE_ON_STARTUP
 import com.voxyn.halcyon.data.SettingsManager.Companion.KEY_DISABLE_SEQUENTIAL_PLAYBACK
@@ -89,6 +97,8 @@ interface PlaybackSettingsAccess {
     val audioOutputSampleRate: Flow<Int>
     val playbackOutputSettings: Flow<PlaybackOutputSettings>
     val shuffleMode: Flow<Int>
+    val preferenceShuffleStrength: Flow<Int>
+    val preferenceShuffleFreshness: Flow<Int>
     val shuffleReshuffleOnStartup: Flow<Boolean>
     val disableSequentialPlayback: Flow<Boolean>
     val playbackModeStopAfterCurrent: Flow<Boolean>
@@ -117,6 +127,8 @@ interface PlaybackSettingsAccess {
     suspend fun setResumePlaybackPosition(enabled: Boolean)
     suspend fun setAudioFocusDisabled(disabled: Boolean)
     suspend fun setShuffleMode(mode: Int)
+    suspend fun setPreferenceShuffleStrength(value: Int)
+    suspend fun setPreferenceShuffleFreshness(value: Int)
     suspend fun setShuffleReshuffleOnStartup(enabled: Boolean)
     suspend fun setDisableSequentialPlayback(enabled: Boolean)
     suspend fun setPlaybackModeStopAfterCurrent(enabled: Boolean)
@@ -209,6 +221,14 @@ internal class PlaybackSettingsAccessImpl(private val context: Context) : Playba
     }
     override val shuffleMode: Flow<Int> =
         context.dataStore.data.map { it[KEY_SHUFFLE_MODE] ?: SHUFFLE_MODE_PREFERENCE }
+    override val preferenceShuffleStrength: Flow<Int> = context.dataStore.data.map {
+        (it[KEY_PREFERENCE_SHUFFLE_STRENGTH] ?: PREFERENCE_SHUFFLE_STRENGTH_DEFAULT)
+            .coerceIn(PREFERENCE_SHUFFLE_STRENGTH_MIN, PREFERENCE_SHUFFLE_STRENGTH_MAX)
+    }
+    override val preferenceShuffleFreshness: Flow<Int> = context.dataStore.data.map {
+        (it[KEY_PREFERENCE_SHUFFLE_FRESHNESS] ?: PREFERENCE_SHUFFLE_FRESHNESS_DEFAULT)
+            .coerceIn(PREFERENCE_SHUFFLE_FRESHNESS_MIN, PREFERENCE_SHUFFLE_FRESHNESS_MAX)
+    }
     override val shuffleReshuffleOnStartup: Flow<Boolean> =
         context.dataStore.data.map { it[KEY_SHUFFLE_RESHUFFLE_ON_STARTUP] ?: false }
     override val disableSequentialPlayback: Flow<Boolean> =
@@ -317,6 +337,19 @@ internal class PlaybackSettingsAccessImpl(private val context: Context) : Playba
 
     override suspend fun setShuffleMode(mode: Int) {
         context.dataStore.edit { it[KEY_SHUFFLE_MODE] = mode.coerceIn(SHUFFLE_MODE_PSEUDO, SHUFFLE_MODE_PREFERENCE) }
+    }
+    override suspend fun setPreferenceShuffleStrength(value: Int) {
+        context.dataStore.edit {
+            it[KEY_PREFERENCE_SHUFFLE_STRENGTH] =
+                value.coerceIn(PREFERENCE_SHUFFLE_STRENGTH_MIN, PREFERENCE_SHUFFLE_STRENGTH_MAX)
+        }
+    }
+
+    override suspend fun setPreferenceShuffleFreshness(value: Int) {
+        context.dataStore.edit {
+            it[KEY_PREFERENCE_SHUFFLE_FRESHNESS] =
+                value.coerceIn(PREFERENCE_SHUFFLE_FRESHNESS_MIN, PREFERENCE_SHUFFLE_FRESHNESS_MAX)
+        }
     }
 
     override suspend fun setShuffleReshuffleOnStartup(enabled: Boolean) {

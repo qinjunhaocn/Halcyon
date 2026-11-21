@@ -34,7 +34,27 @@ internal data class PreferenceShufflePolicy(
     val noveltyBonus: Double = 1.0,
     val freshnessTauDays: Double = 14.0,
     val favoriteBonus: Double = 1.15
-)
+) {
+    companion object {
+        /**
+         * Maps the two user-facing sliders (0-100) onto the policy knobs.
+         *
+         * Strength: 0 keeps a near-uniform shuffle (60% exploration), 100 leans hard on the
+         * preference weights (10% exploration).
+         * Freshness: grows the novelty bonus and shortens the recency decay, so long-unheard
+         * songs come back sooner.
+         */
+        fun forSettings(strength: Int, freshness: Int): PreferenceShufflePolicy {
+            val s = strength.coerceIn(0, 100) / 100.0
+            val f = freshness.coerceIn(0, 100) / 100.0
+            return PreferenceShufflePolicy(
+                exploreShare = 0.6 - 0.5 * s,
+                noveltyBonus = 0.4 + 1.6 * f,
+                freshnessTauDays = 30.0 - 22.0 * f
+            )
+        }
+    }
+}
 
 private const val DAY_MS = 86_400_000.0
 

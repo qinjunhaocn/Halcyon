@@ -114,7 +114,10 @@ class ExoPlayerManager(private val context: Context) {
     private var lastQueueSaveMs = 0L
     private var lastStateSaveMs = 0L
     private var shuffleMode = SettingsManager.SHUFFLE_MODE_PSEUDO
-    private val preferenceShufflePolicy = PreferenceShufflePolicy()
+    @Volatile private var preferenceShuffleStrength = SettingsManager.PREFERENCE_SHUFFLE_STRENGTH_DEFAULT
+    @Volatile private var preferenceShuffleFreshness = SettingsManager.PREFERENCE_SHUFFLE_FRESHNESS_DEFAULT
+    private val preferenceShufflePolicy: PreferenceShufflePolicy
+        get() = PreferenceShufflePolicy.forSettings(preferenceShuffleStrength, preferenceShuffleFreshness)
     @Volatile
     private var reshuffleOnStartup = false
     @Volatile
@@ -204,6 +207,8 @@ class ExoPlayerManager(private val context: Context) {
             try {
                 val saved = kotlinx.coroutines.withContext(Dispatchers.IO) {
                     reshuffleOnStartup = settingsManager.shuffleReshuffleOnStartup.first()
+                    preferenceShuffleStrength = settingsManager.preferenceShuffleStrength.first()
+                    preferenceShuffleFreshness = settingsManager.preferenceShuffleFreshness.first()
                     disableSequentialPlayback = settingsManager.disableSequentialPlayback.first()
                     _shuffleEnabled.value = loadAppShuffleEnabled()
                     _repeatMode.value = loadAppRepeatMode()

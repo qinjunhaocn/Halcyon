@@ -903,9 +903,8 @@ internal fun migratedHomeItems(order: String, hidden: String, shortcuts: Boolean
     return (if (shortcuts) visible.take(shortcutCount) else visible.drop(shortcutCount)).joinToString(",")
 }
 
-internal fun normalizeHomeSearchTarget(@Suppress("UNUSED_PARAMETER") value: String): String =
-    // Local-only build: online search targets (LX, MusicFree) are no longer reachable.
-    "local"
+internal fun normalizeHomeSearchTarget(value: String): String =
+    value.takeIf { it in setOf("local", "lx", "musicfree") } ?: "local"
 
 internal fun resolveHomeSearchTarget(librarySource: String, preference: String): String = when {
     librarySource == SettingsManager.LIBRARY_SOURCE_NETEASE -> "netease"

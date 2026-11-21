@@ -413,6 +413,8 @@ class SettingsManager(private val context: Context) :
         val KEY_RESUME_PLAYBACK_POSITION = booleanPreferencesKey("resume_playback_position")
         val KEY_AUDIO_FOCUS_DISABLED = booleanPreferencesKey("audio_focus_disabled")
         val KEY_SHUFFLE_MODE = intPreferencesKey("shuffle_mode")
+        val KEY_PREFERENCE_SHUFFLE_STRENGTH = intPreferencesKey("preference_shuffle_strength")
+        val KEY_PREFERENCE_SHUFFLE_FRESHNESS = intPreferencesKey("preference_shuffle_freshness")
         val KEY_RANDOM_SORT_SEED = intPreferencesKey("random_sort_seed")
         val KEY_SHUFFLE_RESHUFFLE_ON_STARTUP = booleanPreferencesKey("shuffle_reshuffle_on_startup")
         val KEY_DISABLE_SEQUENTIAL_PLAYBACK = booleanPreferencesKey("disable_sequential_playback")
@@ -887,6 +889,12 @@ class SettingsManager(private val context: Context) :
         const val SHUFFLE_MODE_PSEUDO = 0
         const val SHUFFLE_MODE_TRUE_RANDOM = 1
         const val SHUFFLE_MODE_PREFERENCE = 2
+        const val PREFERENCE_SHUFFLE_STRENGTH_MIN = 0
+        const val PREFERENCE_SHUFFLE_STRENGTH_MAX = 100
+        const val PREFERENCE_SHUFFLE_STRENGTH_DEFAULT = 70
+        const val PREFERENCE_SHUFFLE_FRESHNESS_MIN = 0
+        const val PREFERENCE_SHUFFLE_FRESHNESS_MAX = 100
+        const val PREFERENCE_SHUFFLE_FRESHNESS_DEFAULT = 50
         const val REPLAY_GAIN_OFF = 0
         const val REPLAY_GAIN_TRACK = 1
         const val REPLAY_GAIN_ALBUM = 2

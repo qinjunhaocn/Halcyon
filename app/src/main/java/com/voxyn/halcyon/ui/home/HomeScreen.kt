@@ -14,6 +14,8 @@ import android.widget.Toast
 import android.graphics.Bitmap
 import android.net.Uri
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
@@ -111,6 +113,7 @@ import com.voxyn.halcyon.ui.components.TagEditorOptionKind
 import com.voxyn.halcyon.ui.components.buildTagEditorOptions
 import com.voxyn.halcyon.ui.components.createPlaylistOrShowDuplicateToast
 import com.voxyn.halcyon.ui.components.ellaPageBackground
+import com.voxyn.halcyon.ui.folder.toPrimaryStoragePath
 import com.voxyn.halcyon.ui.components.isAppWallpaperVisible
 import com.voxyn.halcyon.ui.components.launchTagEditorOption
 import com.voxyn.halcyon.ui.components.rememberLibrarySelectionState
@@ -158,6 +161,35 @@ fun LibraryScreen(
     onNavigateToAnalytics: () -> Unit = {},
     onNavigateToSettings: () -> Unit = {}
 ) {
+    val scanContext = androidx.compose.ui.platform.LocalContext.current
+    val emptyScope = rememberCoroutineScope()
+    val folderPicker = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocumentTree()
+    ) { uri ->
+        if (uri == null) return@rememberLauncherForActivityResult
+        val readOnly = android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION
+        val readWrite = readOnly or android.content.Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+        runCatching {
+            scanContext.contentResolver.takePersistableUriPermission(uri, readWrite)
+        }.recoverCatching {
+            scanContext.contentResolver.takePersistableUriPermission(uri, readOnly)
+        }
+        val folderPath = uri.toPrimaryStoragePath()
+        emptyScope.launch {
+            val settings = mainViewModel.settingsManager
+            settings.setUseAndroidMediaLibrary(false)
+            if (folderPath == null) {
+                settings.addUsbFolderUri(uri.toString())
+            } else {
+                val saved = settings.scanIncludeFolders.first()
+                val folders = saved.split('；', ';')
+                    .map { it.trim() }
+                    .filter { it.isNotEmpty() }
+                settings.setScanIncludeFolders((folders + folderPath).distinct().joinToString("；"))
+            }
+            mainViewModel.scanMusic()
+        }
+    }
     val songs by mainViewModel.songs.collectAsState()
     val playlists by mainViewModel.playlists.collectAsState()
     val currentSong by playerViewModel.currentSong.collectAsState()
@@ -670,10 +702,28 @@ fun LibraryScreen(
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
                     item {
                         Box(modifier = Modifier.fillParentMaxSize(), contentAlignment = Alignment.Center) {
-                            Text(
-                                text = stringResource(R.string.library_empty_hint),
-                                color = MiuixTheme.colorScheme.onSurfaceVariantSummary
-                            )
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Text(
+                                    text = stringResource(R.string.library_empty_hint),
+                                    color = MiuixTheme.colorScheme.onSurfaceVariantSummary
+                                )
+                                Spacer(modifier = Modifier.height(16.dp))
+                                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                                    EllaLibraryActionButton(
+                                        text = stringResource(R.string.folder_full_scan),
+                                        primary = true,
+                                        onClick = {
+                                            libraryRefreshing = true
+                                            mainViewModel.scanMusic()
+                                        }
+                                    )
+                                    EllaLibraryActionButton(
+                                        text = stringResource(R.string.add_folder),
+                                        primary = false,
+                                        onClick = { folderPicker.launch(null) }
+                                    )
+                                }
+                            }
                         }
                     }
                 }
@@ -1776,4 +1826,17 @@ private fun libraryPointerDistance(first: Offset, second: Offset): Float {
     val x = second.x - first.x
     val y = second.y - first.y
     return kotlin.math.sqrt(x * x + y * y)
+}
+
+@Composable
+private fun EllaLibraryActionButton(
+    text: String,
+    primary: Boolean,
+    onClick: () -> Unit
+) {
+    com.voxyn.halcyon.ui.components.EllaMiuixChip(
+        text = text,
+        selected = primary,
+        onClick = onClick
+    )
 }

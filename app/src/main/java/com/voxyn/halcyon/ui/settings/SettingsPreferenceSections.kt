@@ -184,10 +184,19 @@ internal fun SettingsLibrarySourceSection(
     if (showNeteaseAccount) {
         com.voxyn.halcyon.ui.online.NeteaseAccountScreen(onDismiss = { showNeteaseAccount = false }, mainViewModel = mainViewModel)
     }
-    // Local-only build: online library sources are not offered anywhere in the UI.
     val librarySourceOptions = listOf(
-        SettingsManager.LIBRARY_SOURCE_LOCAL to stringResource(R.string.settings_library_source_local)
-    )
+        SettingsManager.LIBRARY_SOURCE_LOCAL to stringResource(R.string.settings_library_source_local),
+        SettingsManager.LIBRARY_SOURCE_NETEASE to stringResource(R.string.netease_title),
+        SettingsManager.LIBRARY_SOURCE_NAVIDROME to stringResource(R.string.remote_source_navidrome),
+        SettingsManager.LIBRARY_SOURCE_OPENSUBSONIC to stringResource(R.string.remote_source_opensubsonic),
+        SettingsManager.LIBRARY_SOURCE_EMBY to stringResource(R.string.remote_source_emby),
+        SettingsManager.LIBRARY_SOURCE_WEBDAV to stringResource(R.string.webdav_library_title),
+        SettingsManager.LIBRARY_SOURCE_SMB to stringResource(R.string.smb_title),
+        SettingsManager.LIBRARY_SOURCE_FTP to stringResource(R.string.ftp_library_title),
+        SettingsManager.LIBRARY_SOURCE_SFTP to stringResource(R.string.sftp_library_title)
+    ) + installedSourcePlugins.map {
+        com.voxyn.halcyon.data.sourceplugin.sourcePluginSourceKey(it.id) to it.name
+    }
     val librarySourceEntries = librarySourceOptions.map { DropdownItem(title = it.second) }
     val selectedLibrarySourceIndex = librarySourceOptions
         .indexOfFirst { it.first == librarySource }
@@ -328,6 +337,14 @@ internal fun SettingsLibrarySourceSection(
                     }
                 }
             }
+            // search-anchor:start
+            SettingsSearchAnchor(R.string.source_plugin_manage_entry) {
+            ArrowPreference(
+                title = stringResource(R.string.source_plugin_manage_entry),
+                summary = stringResource(R.string.source_plugin_settings_summary),
+                onClick = { onOpenSourcePlugins?.invoke() }
+            )
+            } // search-anchor:end
         }
     }
 }

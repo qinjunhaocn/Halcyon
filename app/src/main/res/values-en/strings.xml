@@ -907,6 +907,10 @@
     <string name="settings_shuffle_mode_true_random_summary">Pick songs randomly every time, so repeats can happen back to back</string>
     <string name="settings_shuffle_mode_preference">Preference shuffle</string>
     <string name="settings_shuffle_mode_preference_summary">Weight the shuffle by the last 15 days of listens, completion and favourites, and keep 30% of the round uniformly random for freshness</string>
+    <string name="settings_preference_shuffle_strength">Preference strength</string>
+    <string name="settings_preference_shuffle_strength_summary">Higher means songs you replay, finish and favourite come up more often; at 100% only 10% of the round is exploration</string>
+    <string name="settings_preference_shuffle_freshness">Freshness</string>
+    <string name="settings_preference_shuffle_freshness_summary">Higher brings back songs you have not played for a while; at 0% only recent listens are weighted</string>
     <string name="settings_play_next_mode_reverse_stack">Reverse stack</string>
     <string name="settings_play_next_mode_forward_stack">Forward stack</string>
     <string name="settings_play_next_mode_reverse_stack_summary">Each new song is inserted directly after the current song</string>

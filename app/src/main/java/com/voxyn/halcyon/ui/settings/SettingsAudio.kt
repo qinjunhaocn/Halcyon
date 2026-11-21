@@ -89,6 +89,10 @@ fun AudioSettingsScreen(
     val resumePlaybackPosition by settingsManager.resumePlaybackPosition.collectAsState(initial = false)
     val audioFocusDisabled by settingsManager.audioFocusDisabled.collectAsState(initial = false)
     val shuffleMode by settingsManager.shuffleMode.collectAsState(initial = SettingsManager.SHUFFLE_MODE_PSEUDO)
+    val preferenceShuffleStrength by settingsManager.preferenceShuffleStrength
+        .collectAsState(initial = SettingsManager.PREFERENCE_SHUFFLE_STRENGTH_DEFAULT)
+    val preferenceShuffleFreshness by settingsManager.preferenceShuffleFreshness
+        .collectAsState(initial = SettingsManager.PREFERENCE_SHUFFLE_FRESHNESS_DEFAULT)
     val shuffleReshuffleOnStartup by settingsManager.shuffleReshuffleOnStartup.collectAsState(initial = false)
     val disableSequentialPlayback by settingsManager.disableSequentialPlayback.collectAsState(initial = false)
     val playbackModeStopAfterCurrent by settingsManager.playbackModeStopAfterCurrent.collectAsState(initial = false)
@@ -593,6 +597,40 @@ fun AudioSettingsScreen(
                         onSelectedIndexChange = { index ->
                             scope.launch { settingsManager.setShuffleMode(index) }
                             playerViewModel?.setShuffleMode(index)
+                        }
+                    )
+                    } // search-anchor:end
+
+                    // search-anchor:start
+                    SettingsSearchAnchor(R.string.settings_preference_shuffle_strength) {
+                    SettingsIntSliderPreference(
+                        title = stringResource(R.string.settings_preference_shuffle_strength),
+                        summary = stringResource(R.string.settings_preference_shuffle_strength_summary),
+                        value = preferenceShuffleStrength,
+                        valueRange = SettingsManager.PREFERENCE_SHUFFLE_STRENGTH_MIN..
+                            SettingsManager.PREFERENCE_SHUFFLE_STRENGTH_MAX,
+                        valueText = "${preferenceShuffleStrength}%",
+                        steps = 9,
+                        enabled = shuffleMode == SettingsManager.SHUFFLE_MODE_PREFERENCE,
+                        onValueChange = { value ->
+                            scope.launch { settingsManager.setPreferenceShuffleStrength(value) }
+                        }
+                    )
+                    } // search-anchor:end
+
+                    // search-anchor:start
+                    SettingsSearchAnchor(R.string.settings_preference_shuffle_freshness) {
+                    SettingsIntSliderPreference(
+                        title = stringResource(R.string.settings_preference_shuffle_freshness),
+                        summary = stringResource(R.string.settings_preference_shuffle_freshness_summary),
+                        value = preferenceShuffleFreshness,
+                        valueRange = SettingsManager.PREFERENCE_SHUFFLE_FRESHNESS_MIN..
+                            SettingsManager.PREFERENCE_SHUFFLE_FRESHNESS_MAX,
+                        valueText = "${preferenceShuffleFreshness}%",
+                        steps = 9,
+                        enabled = shuffleMode == SettingsManager.SHUFFLE_MODE_PREFERENCE,
+                        onValueChange = { value ->
+                            scope.launch { settingsManager.setPreferenceShuffleFreshness(value) }
                         }
                     )
                     } // search-anchor:end

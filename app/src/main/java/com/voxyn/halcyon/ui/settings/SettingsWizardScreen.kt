@@ -101,9 +101,16 @@ fun SettingsWizardScreen(
         false
     )
     var showNeteaseAccount by remember { mutableStateOf(false) }
-    // Local-only build: online library sources are not offered anywhere in the UI.
     val librarySourceOptions = listOf(
-        SettingsManager.LIBRARY_SOURCE_LOCAL to stringResource(R.string.settings_library_source_local)
+        SettingsManager.LIBRARY_SOURCE_LOCAL to stringResource(R.string.settings_library_source_local),
+        SettingsManager.LIBRARY_SOURCE_NETEASE to stringResource(R.string.netease_title),
+        SettingsManager.LIBRARY_SOURCE_NAVIDROME to stringResource(R.string.remote_source_navidrome),
+        SettingsManager.LIBRARY_SOURCE_OPENSUBSONIC to stringResource(R.string.remote_source_opensubsonic),
+        SettingsManager.LIBRARY_SOURCE_EMBY to stringResource(R.string.remote_source_emby),
+        SettingsManager.LIBRARY_SOURCE_WEBDAV to stringResource(R.string.webdav_library_title),
+        SettingsManager.LIBRARY_SOURCE_SMB to stringResource(R.string.smb_title),
+        SettingsManager.LIBRARY_SOURCE_FTP to stringResource(R.string.ftp_library_title),
+        SettingsManager.LIBRARY_SOURCE_SFTP to stringResource(R.string.sftp_library_title)
     )
     val bottomBarStyleOptions = listOf(
         com.voxyn.halcyon.data.BottomBarStyle.Normal to stringResource(R.string.bottom_bar_style_normal),
