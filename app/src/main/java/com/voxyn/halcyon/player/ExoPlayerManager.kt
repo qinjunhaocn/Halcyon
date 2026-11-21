@@ -24,6 +24,7 @@ import com.voxyn.halcyon.data.PlaylistStore
 import com.voxyn.halcyon.data.SettingsManager
 import com.voxyn.halcyon.data.isMediaStoreAlbumArtworkUri
 import com.voxyn.halcyon.data.model.Song
+import com.voxyn.halcyon.data.model.playlistIdentityKey
 import com.voxyn.halcyon.data.repository.MusicRepository
 import com.google.common.util.concurrent.FutureCallback
 import com.google.common.util.concurrent.Futures
