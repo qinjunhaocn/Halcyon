@@ -71,6 +71,18 @@ jobs:
       - name: Make Gradle wrapper executable
         run: chmod +x ./gradlew
 
+      - name: Diagnose dependency repositories
+        run: |
+          for u in \
+            https://repo.maven.apache.org/maven2/org/ow2/asm/asm/9.9/asm-9.9.pom \
+            https://plugins.gradle.org/m2/org/jetbrains/kotlin/compose-compiler-gradle-plugin/2.4.20/compose-compiler-gradle-plugin-2.4.20.pom \
+            https://maven.aliyun.com/repository/public/org/ow2/asm/asm/9.9/asm-9.9.pom \
+            https://maven.aliyun.com/repository/gradle-plugin/org/jetbrains/kotlin/compose-compiler-gradle-plugin/2.4.20/compose-compiler-gradle-plugin-2.4.20.pom \
+            https://dl.google.com/dl/android/maven2/com/android/tools/build/gradle/9.4.1/gradle-9.4.1.pom ; do
+            echo -n "$u -> "
+            curl -s -o /dev/null -w "%{http_code}\n" -m 25 "$u" || echo "curl-failed"
+          done
+
       - name: Build debug APK
         if: ${{ github.event_name != 'workflow_dispatch' || inputs.build_type == 'debug' }}
         env:

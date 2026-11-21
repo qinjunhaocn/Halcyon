@@ -1,5 +1,10 @@
 pluginManagement {
     repositories {
+        // Mirrors first: the GitHub runner cannot always reach Maven Central or the
+        // Gradle plugin portal directly, and buildscript plugins must resolve.
+        maven { url = uri("https://maven.aliyun.com/repository/gradle-plugin") }
+        maven { url = uri("https://maven.aliyun.com/repository/public") }
+        maven { url = uri("https://maven.aliyun.com/repository/google") }
         google()
         mavenCentral()
         gradlePluginPortal()
@@ -9,6 +14,8 @@ pluginManagement {
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
+        maven { url = uri("https://maven.aliyun.com/repository/public") }
+        maven { url = uri("https://maven.aliyun.com/repository/google") }
         google()
         mavenCentral()
         // Android publications of the local compose-miuix-ui checkout (main ac0af467).
