@@ -64,19 +64,36 @@ jobs:
             sed -i 's/AndroidVersion.ApiLevel=36/AndroidVersion.ApiLevel=37/' "$ANDROID_HOME/platforms/android-37/source.properties"
           fi
           sdkmanager --channel=3 "build-tools;37.0.0" || sdkmanager "build-tools;36.0.0"
-          if ! sdkmanager --channel=3 "platforms;android-37.2"; then
-            echo "platforms;android-37.2 is unavailable from sdkmanager; deriving it from the CI platform."
-            rm -rf "$ANDROID_HOME/platforms/android-37.2"
-            cp -a "$ANDROID_HOME/platforms/android-37/." "$ANDROID_HOME/platforms/android-37.2/"
-            sed -i 's/AndroidVersion.ApiLevel=37/AndroidVersion.ApiLevel=37.2/' "$ANDROID_HOME/platforms/android-37.2/source.properties"
-            sed -i 's|<api-level>[0-9]*</api-level>|<api-level>37</api-level>|' "$ANDROID_HOME/platforms/android-37.2/package.xml" 2>/dev/null || true
-          fi
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
 
       - name: Make Gradle wrapper executable
         run: chmod +x ./gradlew
+
+      - name: Build pinned miuix snapshot dependency
+        run: |
+          set -euo pipefail
+          rm -rf ../miuix
+          git clone --filter=blob:none https://github.com/compose-miuix-ui/miuix.git ../miuix
+          cd ../miuix
+          git checkout -q ac0af467
+          # repo1.maven.org and the plugin portal are not always reachable from the runner.
+          sed -i 's|mavenCentral()|maven("https://repo.maven.apache.org/maven2")|g' settings.gradle.kts
+          sed -i 's|gradlePluginPortal()|gradlePluginPortal()\n        maven("https://maven.aliyun.com/repository/gradle-plugin")|g' settings.gradle.kts
+          sed -i 's|google {|maven("https://maven.aliyun.com/repository/google")\n        google {|g' settings.gradle.kts
+          sed -i 's|mavenCentral()|maven("https://repo.maven.apache.org/maven2")|g' build-logic/settings.gradle.kts
+          ./gradlew --no-daemon \
+            :miuix-core:publishAllPublicationsToLocalRepository \
+            :miuix-ui:publishAllPublicationsToLocalRepository \
+            :miuix-preference:publishAllPublicationsToLocalRepository \
+            :miuix-material:publishAllPublicationsToLocalRepository \
+            :miuix-blur:publishAllPublicationsToLocalRepository \
+            :miuix-glass:publishAllPublicationsToLocalRepository \
+            :miuix-glass-icons:publishAllPublicationsToLocalRepository \
+            :miuix-squircle:publishAllPublicationsToLocalRepository \
+            :miuix-icons:publishAllPublicationsToLocalRepository
+          ls ../miuix/miuix-core/build/repository/local
 
       - name: Diagnose dependency repositories
         run: |

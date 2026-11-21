@@ -27,6 +27,10 @@ dependencyResolutionManagement {
         maven { url = uri("../miuix/miuix-ui/build/repository/local") }
         maven { url = uri("../miuix/miuix-icons/build/repository/local") }
         maven { url = uri("../miuix/miuix-preference/build/repository/local") }
+        maven { url = uri("../miuix/miuix-glass/build/repository/local") }
+        maven { url = uri("../miuix/miuix-glass-icons/build/repository/local") }
+        maven { url = uri("../miuix/miuix-nav/build/repository/local") }
+        maven { url = uri("../miuix/miuix-window/build/repository/local") }
         // FFmpegKit's archived Android artifacts are mirrored here after their original
         // distribution repository was retired.
         maven { url = uri("https://maven.aliyun.com/repository/public") }

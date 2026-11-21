@@ -106,8 +106,6 @@ abstract class CopyRenamedApksTask : DefaultTask() {
 android {
     namespace = "com.voxyn.halcyon"
     compileSdk = 37
-    // Published miuix 0.9.5 betas are built against API 37.2
-    compileSdkMinor = 2
     testOptions { unitTests.isIncludeAndroidResources = true }
     val releaseStoreFile = System.getenv("RELEASE_STORE_FILE")
         ?.takeIf { it.isNotBlank() }
