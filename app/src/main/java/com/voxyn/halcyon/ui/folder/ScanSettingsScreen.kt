@@ -240,7 +240,8 @@ fun ScanSettingsScreen(
                         pendingRemoveScanFolder = folderPath
                     },
                     scanEnabled = !isScanning,
-                    onScan = { mainViewModel.scanMusic() }
+                    onScan = { mainViewModel.scanMusic() },
+                    onAddFolder = { folderPicker.launch(null) }
                 )
             }
 

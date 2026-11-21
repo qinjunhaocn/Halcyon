@@ -5,6 +5,7 @@ import android.provider.DocumentsContract
 import android.net.Uri
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -180,7 +181,8 @@ internal fun UsbFoldersCard(
     highlight: Boolean = false,
     onRemove: (String) -> Unit,
     scanEnabled: Boolean,
-    onScan: () -> Unit
+    onScan: () -> Unit,
+    onAddFolder: () -> Unit = {}
 ) {
     val frosting = LocalSettingsCardFrosting.current
     val cardModifier = frostedCardModifier(
@@ -307,6 +309,20 @@ internal fun SavedScanFoldersCard(
                     onScan = onScan,
                     iconSize = 22.dp,
                     contentDescription = stringResource(R.string.folder_full_scan)
+                )
+            }
+            // Icon-only affordances are easy to miss (and some ROMs render the vector add
+            // action invisibly), so the card always carries two explicit text actions.
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                TextActionChip(
+                    text = stringResource(R.string.add_folder),
+                    enabled = true,
+                    onClick = onAddFolder
+                )
+                TextActionChip(
+                    text = stringResource(R.string.folder_full_scan),
+                    enabled = scanEnabled,
+                    onClick = onScan
                 )
             }
             folders.forEach { folder ->
@@ -601,5 +617,33 @@ internal fun BlockedFoldersDialog(
                 )
             }
         }
+    }
+}
+
+/** Small text-only action used where an icon-only affordance would be too easy to miss. */
+@Composable
+internal fun TextActionChip(
+    text: String,
+    enabled: Boolean,
+    onClick: () -> Unit
+) {
+    val color = if (enabled) {
+        MiuixTheme.colorScheme.primary
+    } else {
+        MiuixTheme.colorScheme.onSurfaceVariantSummary
+    }
+    Box(
+        modifier = Modifier
+            .clip(RoundedCornerShape(999.dp))
+            .background(MiuixTheme.colorScheme.surfaceContainer)
+            .clickable(enabled = enabled, onClick = onClick)
+            .padding(horizontal = 12.dp, vertical = 7.dp)
+    ) {
+        Text(
+            text = text,
+            fontSize = 13.sp,
+            fontWeight = FontWeight.Medium,
+            color = color
+        )
     }
 }
