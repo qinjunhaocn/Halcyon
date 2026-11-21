@@ -87,7 +87,7 @@ jobs:
             ../miuix/miuix-glass-icons/build/repository/local
             ../miuix/miuix-squircle/build/repository/local
             ../miuix/miuix-icons/build/repository/local
-          key: miuix-ac0af467-android-v1
+          key: miuix-ac0af467-android-v2
 
       - name: Build pinned miuix Android publications
         if: steps.miuix-cache.outputs.cache-hit != 'true'
@@ -107,7 +107,8 @@ jobs:
             'gradle.projectsEvaluated {' \
             '    rootProject.allprojects { p ->' \
             '        p.tasks.matching { t ->' \
-            '            t.name.startsWith("publish") && t.name.endsWith("ToLocalRepository") && !t.name.contains("Android")' \
+            '            def keep = t.name.contains("Android") || t.name.contains("KotlinMultiplatform")' \
+            '            t.name.startsWith("publish") && t.name.endsWith("ToLocalRepository") && !keep' \
             '        }.configureEach { enabled = false }' \
             '    }' \
             '}' > /tmp/android-only.gradle
@@ -137,7 +138,7 @@ jobs:
             ../miuix/miuix-glass-icons/build/repository/local
             ../miuix/miuix-squircle/build/repository/local
             ../miuix/miuix-icons/build/repository/local
-          key: miuix-ac0af467-android-v1
+          key: miuix-ac0af467-android-v2
 
       - name: Diagnose dependency repositories
         run: |
