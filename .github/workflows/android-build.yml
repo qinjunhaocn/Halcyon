@@ -22,8 +22,10 @@ permissions:
   contents: read
 
 concurrency:
-  group: android-build-${{ github.ref }}
-  cancel-in-progress: true
+  # Each run gets its own group: a push must never kill a build that is already
+  # publishing the miuix snapshot (that costs real minutes to redo).
+  group: android-build-${{ github.ref }}-${{ github.run_id }}
+  cancel-in-progress: false
 
 jobs:
   build-arm64:
@@ -71,7 +73,24 @@ jobs:
       - name: Make Gradle wrapper executable
         run: chmod +x ./gradlew
 
+      - name: Restore miuix local publications
+        id: miuix-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            ../miuix/miuix-core/build/repository/local
+            ../miuix/miuix-ui/build/repository/local
+            ../miuix/miuix-preference/build/repository/local
+            ../miuix/miuix-material/build/repository/local
+            ../miuix/miuix-blur/build/repository/local
+            ../miuix/miuix-glass/build/repository/local
+            ../miuix/miuix-glass-icons/build/repository/local
+            ../miuix/miuix-squircle/build/repository/local
+            ../miuix/miuix-icons/build/repository/local
+          key: miuix-ac0af467-android-v1
+
       - name: Build pinned miuix Android publications
+        if: steps.miuix-cache.outputs.cache-hit != 'true'
         run: |
           set -euo pipefail
           rm -rf ../miuix
@@ -83,8 +102,7 @@ jobs:
           sed -i 's|gradlePluginPortal()|gradlePluginPortal()\n        maven("https://maven.aliyun.com/repository/gradle-plugin")|g' settings.gradle.kts
           sed -i 's|google {|maven("https://maven.aliyun.com/repository/google")\n        google {|g' settings.gradle.kts
           sed -i 's|mavenCentral()|maven("https://repo.maven.apache.org/maven2")|g' build-logic/settings.gradle.kts
-          # The app only consumes the Android artifacts, so skip every ios/macos/js/desktop
-          # publication: publishing them costs tens of minutes and never gets used.
+          # The app only consumes the Android artifacts.
           printf '%s\n' \
             'gradle.projectsEvaluated {' \
             '    rootProject.allprojects { p ->' \
@@ -103,7 +121,23 @@ jobs:
             :miuix-glass-icons:publishAllPublicationsToLocalRepository \
             :miuix-squircle:publishAllPublicationsToLocalRepository \
             :miuix-icons:publishAllPublicationsToLocalRepository
-          find ../miuix -maxdepth 3 -path "*repository/local/top*" -type d | head -20
+          ls ../miuix/miuix-ui/build/repository/local/top/yukonga/miuix/kmp | head
+
+      - name: Save miuix local publications
+        if: steps.miuix-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            ../miuix/miuix-core/build/repository/local
+            ../miuix/miuix-ui/build/repository/local
+            ../miuix/miuix-preference/build/repository/local
+            ../miuix/miuix-material/build/repository/local
+            ../miuix/miuix-blur/build/repository/local
+            ../miuix/miuix-glass/build/repository/local
+            ../miuix/miuix-glass-icons/build/repository/local
+            ../miuix/miuix-squircle/build/repository/local
+            ../miuix/miuix-icons/build/repository/local
+          key: miuix-ac0af467-android-v1
 
       - name: Diagnose dependency repositories
         run: |
