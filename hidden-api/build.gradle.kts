@@ -3,7 +3,7 @@ plugins {
 }
 
 android {
-    namespace = "com.ella.music.hiddenapi"
+    namespace = "com.voxyn.halcyon.hiddenapi"
     compileSdk = 37
 
     defaultConfig {

@@ -4,22 +4,22 @@
   "source": "https://github.com/compose-miuix-ui/miuix",
   "files": [
     {
-      "path": "app/src/main/java/com/ella/music/ui/animation/DampedDragAnimation.kt",
+      "path": "app/src/main/java/com/voxyn/halcyon/ui/animation/DampedDragAnimation.kt",
       "upstreamFile": "DampedDragAnimation.kt",
       "upstreamSha256": "09e528d26e2c58eafe63e80832aa0d3473d8a8676561155592577d27a26e626a",
-      "adaptedSha256": "9644441c9c625b12ac69d78cbdb1e7c4fb42033aa09f3f8bf86ca3c0f3a1dfc2"
+      "adaptedSha256": "6caae034d27a009dc42ef1539ff5f2fd8591769a8480fd463a744ba47d969a7a"
     },
     {
-      "path": "app/src/main/java/com/ella/music/ui/animation/InteractiveHighlight.kt",
+      "path": "app/src/main/java/com/voxyn/halcyon/ui/animation/InteractiveHighlight.kt",
       "upstreamFile": "InteractiveHighlight.kt",
       "upstreamSha256": "bb299663f3b8c85193ef628ee1eaf38fdf07cc12f4dd8feed6f31c7d5c75a4e8",
-      "adaptedSha256": "6d84daf1b5a8a553d24f8df4cb35259c51bd474d8bb1166355c1f2e6330e6278"
+      "adaptedSha256": "ed25d72284154d4f949671591f03562d2899cea70e422ba1257c7bbfdea1cd92"
     },
     {
-      "path": "app/src/main/java/com/ella/music/ui/components/FloatingBottomBar.kt",
+      "path": "app/src/main/java/com/voxyn/halcyon/ui/components/FloatingBottomBar.kt",
       "upstreamFile": "LiquidGlassNavigationBar.kt",
       "upstreamSha256": "77e4cbb63909a0bf86782d3641f8aff553d6e48dc4baac3c7e8308f81812c0c4",
-      "adaptedSha256": "fdb46413506f44a253d3b528a9ce2ba68525838cb6e487eb4a4e09a3a9fc4c25"
+      "adaptedSha256": "9cca2156a911f2e9b8e5f5c4367cb437e7d6c2e775f39e6a807598271f89f083"
     }
   ],
   "adaptedHashNormalization": "LF"

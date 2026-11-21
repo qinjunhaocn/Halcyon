@@ -169,8 +169,8 @@
             android:windowSoftInputMode="adjustResize"
             android:theme="@style/Theme.Ella">
             <intent-filter>
-                <action android:name="com.ella.music.action.LYRIC_TIMING" />
-                <action android:name="com.ella.music.action.EDIT_LYRICS" />
+                <action android:name="com.voxyn.halcyon.action.LYRIC_TIMING" />
+                <action android:name="com.voxyn.halcyon.action.EDIT_LYRICS" />
                 <action android:name="android.intent.action.EDIT" />
                 <action android:name="android.intent.action.SEND" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -211,7 +211,7 @@
             android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize"
             android:theme="@style/Theme.Ella">
             <intent-filter>
-                <action android:name="com.ella.music.action.VIEW_SPECTRUM" />
+                <action android:name="com.voxyn.halcyon.action.VIEW_SPECTRUM" />
                 <action android:name="android.intent.action.SEND" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="audio/*" />
@@ -234,13 +234,13 @@
             android:theme="@style/Theme.Ella" />
 
         <activity-alias
-            android:name="com.ella.music.DefaultLauncherAlias"
+            android:name="com.voxyn.halcyon.DefaultLauncherAlias"
             android:enabled="true"
             android:exported="true"
             android:icon="@mipmap/ic_launcher"
             android:label="@string/app_name"
             android:banner="@drawable/tv_banner"
-            android:targetActivity="com.ella.music.MainActivity">
+            android:targetActivity="com.voxyn.halcyon.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -249,13 +249,13 @@
         </activity-alias>
 
         <activity-alias
-            android:name="com.ella.music.AnimeLauncherAlias"
+            android:name="com.voxyn.halcyon.AnimeLauncherAlias"
             android:enabled="false"
             android:exported="true"
             android:icon="@mipmap/ic_launcher_anime"
             android:label="@string/app_name"
             android:banner="@drawable/tv_banner"
-            android:targetActivity="com.ella.music.MainActivity">
+            android:targetActivity="com.voxyn.halcyon.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -265,13 +265,13 @@
 
         <!-- Upgrade bridge for existing launcher shortcuts; renders the default icon. -->
         <activity-alias
-            android:name="com.ella.music.BlackHairLauncherAlias"
+            android:name="com.voxyn.halcyon.BlackHairLauncherAlias"
             android:enabled="false"
             android:exported="true"
             android:icon="@mipmap/ic_launcher"
             android:label="@string/app_name"
             android:banner="@drawable/tv_banner"
-            android:targetActivity="com.ella.music.MainActivity">
+            android:targetActivity="com.voxyn.halcyon.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -280,13 +280,13 @@
         </activity-alias>
 
         <activity-alias
-            android:name="com.ella.music.LoliLauncherAlias"
+            android:name="com.voxyn.halcyon.LoliLauncherAlias"
             android:enabled="false"
             android:exported="true"
             android:icon="@mipmap/ic_launcher_loli"
             android:label="@string/app_name"
             android:banner="@drawable/tv_banner"
-            android:targetActivity="com.ella.music.MainActivity">
+            android:targetActivity="com.voxyn.halcyon.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -295,13 +295,13 @@
         </activity-alias>
 
         <activity-alias
-            android:name="com.ella.music.TraditionalLauncherAlias"
+            android:name="com.voxyn.halcyon.TraditionalLauncherAlias"
             android:enabled="false"
             android:exported="true"
             android:icon="@mipmap/ic_launcher_traditional"
             android:label="@string/app_name"
             android:banner="@drawable/tv_banner"
-            android:targetActivity="com.ella.music.MainActivity">
+            android:targetActivity="com.voxyn.halcyon.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

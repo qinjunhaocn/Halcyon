@@ -1,0 +1,8 @@
+package com.voxyn.halcyon.shizuku;
+
+/** Binder interface exposed by the Shizuku user service. */
+interface IShizukuShellService {
+    String exec(String command);
+    void destroy();
+    boolean setOriginOsMediaIslandScene(String packageName, boolean enabled);
+}

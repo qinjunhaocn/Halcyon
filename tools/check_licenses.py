@@ -16,7 +16,7 @@ for source in (root / 'app/src/main').rglob('*'):
         errors.append('Copyleft application source requires explicit integration review: ' + str(source.relative_to(root)))
     if 'KernelSU' in header or 'InstallerX Revived' in header:
         errors.append('Removed GPL navigation provenance reintroduced: ' + str(source.relative_to(root)))
-if (root / 'app/src/main/java/com/ella/music/ui/util/DragGestureInspector.kt').exists():
+if (root / 'app/src/main/java/com/voxyn/halcyon/ui/util/DragGestureInspector.kt').exists():
     errors.append('The retired GPL gesture inspector must remain absent')
 if errors:
     print('\n'.join(errors)); sys.exit(1)

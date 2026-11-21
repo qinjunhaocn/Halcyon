@@ -104,7 +104,7 @@ abstract class CopyRenamedApksTask : DefaultTask() {
 }
 
 android {
-    namespace = "com.ella.music"
+    namespace = "com.voxyn.halcyon"
     compileSdk = 37
     testOptions { unitTests.isIncludeAndroidResources = true }
     val releaseStoreFile = System.getenv("RELEASE_STORE_FILE")
@@ -126,7 +126,7 @@ android {
     defaultConfig {
         // All standalone build types use Kano's independent ID; default builds keep
         // the upstream ID so contribution builds do not rename the original application.
-        applicationId = if (originOsTestBuild) "com.ella.music.kano" else "com.ella.music"
+        applicationId = if (originOsTestBuild) "com.voxyn.halcyon.kano" else "com.voxyn.halcyon"
         minSdk = 29
         targetSdk = 37
         versionCode = 41

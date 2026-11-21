@@ -905,6 +905,8 @@
     <string name="settings_shuffle_mode_true_random">True random</string>
     <string name="settings_shuffle_mode_pseudo_random_summary">Shuffle the queue and try not to repeat songs within one round</string>
     <string name="settings_shuffle_mode_true_random_summary">Pick songs randomly every time, so repeats can happen back to back</string>
+    <string name="settings_shuffle_mode_preference">Preference shuffle</string>
+    <string name="settings_shuffle_mode_preference_summary">Weight the shuffle by the last 15 days of listens, completion and favourites, and keep 30% of the round uniformly random for freshness</string>
     <string name="settings_play_next_mode_reverse_stack">Reverse stack</string>
     <string name="settings_play_next_mode_forward_stack">Forward stack</string>
     <string name="settings_play_next_mode_reverse_stack_summary">Each new song is inserted directly after the current song</string>

@@ -1,4 +1,4 @@
-import com.ella.music.data.parser.LrcParser
+import com.voxyn.halcyon.data.parser.LrcParser
 
 fun main() {
     val result = LrcParser.parse(

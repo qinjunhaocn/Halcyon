@@ -1,0 +1,282 @@
+package com.voxyn.halcyon.ui.artist
+
+import android.net.Uri
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.runtime.produceState
+import androidx.compose.runtime.remember
+import com.voxyn.halcyon.data.ArtistCoverAsset
+import com.voxyn.halcyon.data.ArtistCoverKind
+import com.voxyn.halcyon.data.ArtistImageRepository
+import com.voxyn.halcyon.data.ResolvedArtistImage
+import com.voxyn.halcyon.data.SettingsManager
+import com.voxyn.halcyon.data.lastfm.DEFAULT_LAST_FM_WIKI_REGION
+import com.voxyn.halcyon.data.lastfm.LastFmSecureStore
+import com.voxyn.halcyon.data.lastfm.isWifiConnected
+import com.voxyn.halcyon.data.model.Song
+import com.voxyn.halcyon.ui.components.ArtworkUsage
+import com.voxyn.halcyon.ui.components.rememberSongArtworkState
+import com.voxyn.halcyon.viewmodel.MainViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+
+@Composable
+internal fun rememberArtistCoverUri(
+    artistName: String,
+    folderLocation: String,
+    mainViewModel: MainViewModel
+): Uri? {
+    val generation by com.voxyn.halcyon.data.ArtistCoverRepository.getInstance(LocalContext.current).generation.collectAsState()
+    val state by produceState<Uri?>(
+        initialValue = null,
+        artistName,
+        folderLocation,
+        generation
+    ) {
+        value = if (artistName.isBlank() || folderLocation.isBlank()) {
+            null
+        } else {
+            withContext(Dispatchers.IO) {
+                mainViewModel.getArtistCoverUri(artistName, folderLocation)
+            }
+        }
+    }
+    return state
+}
+
+/**
+ * Resolves every artist image through the same chain: a custom artist asset first, then the
+ * caller's policy-selected library song artwork. Keeping the custom-asset check here prevents
+ * search cards, detail metadata and the artist list from drifting apart again.
+ */
+@Composable
+internal fun rememberArtistCoverModel(
+    artistName: String,
+    representativeSong: Song?,
+    folderLocation: String,
+    mainViewModel: MainViewModel,
+    coversEnabled: Boolean = true,
+    includeLibraryArtwork: Boolean = true
+): Any? {
+    return rememberArtistCoverResolution(
+        artistName = artistName,
+        representativeSong = representativeSong,
+        folderLocation = folderLocation,
+        mainViewModel = mainViewModel,
+        coversEnabled = coversEnabled,
+        includeLibraryArtwork = includeLibraryArtwork
+    ).model
+}
+
+internal data class ArtistCoverResolution(
+    val model: Any?,
+    val downloadSource: String? = null
+)
+
+@Composable
+internal fun rememberArtistCoverResolution(
+    artistName: String,
+    representativeSong: Song?,
+    folderLocation: String,
+    mainViewModel: MainViewModel,
+    coversEnabled: Boolean = true,
+    includeLibraryArtwork: Boolean = true
+): ArtistCoverResolution {
+    if (!coversEnabled) return ArtistCoverResolution(null)
+    val context = LocalContext.current
+    val settingsManager = mainViewModel.settingsManager
+    // Null until DataStore emits — never default to an allowed mode, otherwise the first
+    // composition on wifi silently downloads once even when the user picked 从不 (#758).
+    val artistImageDownload by settingsManager.artistImageDownload.collectAsState(initial = null)
+    val artistImageSourceOrder by settingsManager.artistImageSourceOrder.collectAsState(
+        initial = SettingsManager.DEFAULT_ARTIST_IMAGE_SOURCES
+    )
+    val lastFmCredentials by LastFmSecureStore.getInstance(context).credentials.collectAsState()
+    val lastFmRegion by settingsManager.artistImageRegion.collectAsState(
+        initial = DEFAULT_LAST_FM_WIKI_REGION
+    )
+    val spotifyRegion by settingsManager.artistSpotifyRegion.collectAsState(initial = "US")
+    val spotifyClientId by settingsManager.spotifyClientId.collectAsState(initial = "")
+    val spotifyClientSecret by settingsManager.spotifyClientSecret.collectAsState(initial = "")
+    val networkDownloadAllowed = when (artistImageDownload) {
+        SettingsManager.ARTIST_IMAGE_DOWNLOAD_ALWAYS -> true
+        SettingsManager.ARTIST_IMAGE_DOWNLOAD_WIFI -> isWifiConnected(context)
+        else -> false
+    }
+    val albumArtUri = remember(coversEnabled, representativeSong?.albumId) {
+        representativeSong
+            ?.albumId
+            ?.takeIf { coversEnabled && it > 0L }
+            ?.let(mainViewModel::getAlbumArtUri)
+    }
+    val artistCoverDownloadFolderUri by settingsManager.artistCoverDownloadFolderUri.collectAsState(initial = "")
+    val artworkState = rememberSongArtworkState(
+        song = representativeSong,
+        albumArtUri = albumArtUri,
+        loadCoverArt = mainViewModel::getArtistCoverArtBitmap,
+        usage = ArtworkUsage.ArtistImage,
+        showDefaultWhenMissing = false
+    )
+    val customArtistCoverUri = rememberArtistCoverUri(
+        artistName = artistName,
+        folderLocation = if (coversEnabled) folderLocation else "",
+        mainViewModel = mainViewModel
+    ) ?: rememberArtistCoverUri(
+        artistName = artistName,
+        folderLocation = if (coversEnabled && artistCoverDownloadFolderUri.isNotBlank() && artistCoverDownloadFolderUri != folderLocation) artistCoverDownloadFolderUri else "",
+        mainViewModel = mainViewModel
+    )
+    val librarySource by settingsManager.librarySource.collectAsState(initial = "")
+    val neteaseArtistImage by produceState<String?>(
+        initialValue = null, artistName, librarySource, networkDownloadAllowed
+    ) {
+        // The NetEase library lookup is still an automatic artist image fetch, so it must
+        // obey the same download-mode switch as the other sources (#753).
+        value = if (librarySource == SettingsManager.LIBRARY_SOURCE_NETEASE && artistName.isNotBlank() && networkDownloadAllowed) {
+            neteaseArtistImageCache[artistName] ?: com.voxyn.halcyon.data.lastfm.fetchNeteaseArtistImage(artistName)
+                ?.replaceFirst("http://", "https://")
+                ?.also { neteaseArtistImageCache[artistName] = it }
+        } else null
+    }
+    val generation by com.voxyn.halcyon.data.ArtistCoverRepository.getInstance(context).generation.collectAsState()
+    val downloadedArtistCover by produceState<ResolvedArtistImage?>(
+        initialValue = null,
+        artistName,
+        artistImageDownload,
+        artistImageSourceOrder,
+        networkDownloadAllowed,
+        lastFmCredentials.apiKey,
+        lastFmRegion,
+        spotifyRegion,
+        spotifyClientId,
+        spotifyClientSecret,
+        artistCoverDownloadFolderUri,
+        folderLocation,
+        generation
+    ) {
+        value = if (!networkDownloadAllowed) {
+            ArtistImageRepository.findCached(
+                context = context.applicationContext,
+                artistName = artistName,
+                sourceOrder = artistImageSourceOrder,
+                lastFmRegion = lastFmRegion,
+                spotifyClientId = spotifyClientId,
+                downloadFolderUri = artistCoverDownloadFolderUri,
+                customFolderUri = folderLocation,
+                spotifyRegion = spotifyRegion
+            )
+        } else {
+            ArtistImageRepository.resolveDetailed(
+                context = context.applicationContext,
+                artistName = artistName,
+                sourceOrder = artistImageSourceOrder,
+                lastFmApiKey = lastFmCredentials.apiKey,
+                lastFmRegion = lastFmRegion,
+                spotifyClientId = spotifyClientId,
+                spotifyClientSecret = spotifyClientSecret,
+                downloadFolderUri = artistCoverDownloadFolderUri,
+                customFolderUri = folderLocation,
+                spotifyRegion = spotifyRegion
+            )
+        }
+    }
+    // The order mirrors issue #567: local artist assets, downloaded artist art, then the
+    // representative song's carefully ranked embedded/album artwork.
+    val libraryArtwork = if (includeLibraryArtwork) artworkState.model else null
+    neteaseArtistImage?.takeIf { customArtistCoverUri == null }?.let { url ->
+        return ArtistCoverResolution(model = url, downloadSource = SettingsManager.ARTIST_IMAGE_SOURCE_NETEASE)
+    }
+    return ArtistCoverResolution(
+        model = customArtistCoverUri ?: downloadedArtistCover?.uri ?: libraryArtwork,
+        downloadSource = downloadedArtistCover?.source?.takeIf { customArtistCoverUri == null }
+    )
+}
+
+/** Session cache of NetEase artist picture URLs so list rows don't repeat the search request. */
+private val neteaseArtistImageCache = java.util.concurrent.ConcurrentHashMap<String, String>()
+
+@Composable
+internal fun rememberArtistCoverAssets(
+    artistName: String,
+    folderLocation: String,
+    mainViewModel: MainViewModel,
+    songs: List<Song> = emptyList()
+): List<ArtistCoverAsset> {
+    val artistCoverDownloadFolderUri by mainViewModel.settingsManager.artistCoverDownloadFolderUri.collectAsState(initial = "")
+    val dynamicCoverCustomFolders by mainViewModel.settingsManager.dynamicCoverCustomFolders.collectAsState(initial = emptyList())
+    val context = LocalContext.current
+    val generation by com.voxyn.halcyon.data.ArtistCoverRepository.getInstance(context).generation.collectAsState()
+    val state by produceState<List<ArtistCoverAsset>>(
+        initialValue = emptyList(),
+        artistName,
+        folderLocation,
+        artistCoverDownloadFolderUri,
+        dynamicCoverCustomFolders,
+        songs.size,
+        generation
+    ) {
+        value = if (artistName.isBlank()) {
+            emptyList()
+        } else {
+            withContext(Dispatchers.IO) {
+                val collected = mutableListOf<ArtistCoverAsset>()
+                val ignoreCase = com.voxyn.halcyon.data.NameSplitConfigStore.tagIgnoreCase
+                val safeArtistKey = com.voxyn.halcyon.data.normalizeArtistCoverKey(artistName, ignoreCase)
+
+                // 1. Primary custom folder
+                if (folderLocation.isNotBlank()) {
+                    collected.addAll(mainViewModel.getArtistCoverAssets(artistName, folderLocation))
+                }
+                // 2. Download folder
+                if (artistCoverDownloadFolderUri.isNotBlank() && artistCoverDownloadFolderUri != folderLocation) {
+                    collected.addAll(mainViewModel.getArtistCoverAssets(artistName, artistCoverDownloadFolderUri))
+                }
+                // 3. Dynamic cover custom folders
+                dynamicCoverCustomFolders.forEach { folder ->
+                    if (folder.isNotBlank() && folder != folderLocation && folder != artistCoverDownloadFolderUri) {
+                        collected.addAll(mainViewModel.getArtistCoverAssets(artistName, folder))
+                    }
+                }
+                // 4. Default dynamic cover directories
+                val roots = com.voxyn.halcyon.ui.player.dynamicCoverRootDirectories(context, dynamicCoverCustomFolders)
+                roots.forEach { root ->
+                    if (root.exists() && root.isDirectory) {
+                        root.listFiles()?.forEach { file ->
+                            if (file.isFile) {
+                                val match = com.voxyn.halcyon.data.artistCoverMatch(file.name, ignoreCase = ignoreCase)
+                                if (match != null && match.key == safeArtistKey) {
+                                    collected.add(ArtistCoverAsset(Uri.fromFile(file), match.kind))
+                                }
+                            }
+                        }
+                    }
+                }
+                // 5. Folders of songs by this artist
+                val songDirs = songs.mapNotNull { song ->
+                    song.path.takeIf { it.isNotBlank() && !it.startsWith("http://") && !it.startsWith("https://") }
+                        ?.let { java.io.File(it).parentFile }
+                }.distinctBy { it.absolutePath }
+                songDirs.forEach { dir ->
+                    if (dir.exists() && dir.isDirectory) {
+                        dir.listFiles()?.forEach { file ->
+                            if (file.isFile) {
+                                val match = com.voxyn.halcyon.data.artistCoverMatch(file.name, ignoreCase = ignoreCase)
+                                if (match != null && match.key == safeArtistKey) {
+                                    collected.add(ArtistCoverAsset(Uri.fromFile(file), match.kind))
+                                }
+                            }
+                        }
+                    }
+                }
+                // Deduplicate by URI and ensure Videos are always ordered first
+                val distinct = collected.distinctBy { it.uri.toString() }
+                val videos = distinct.filter { it.kind == ArtistCoverKind.Video }
+                val images = distinct.filter { it.kind == ArtistCoverKind.Image }
+                videos + images
+            }
+        }
+    }
+    return state
+}

@@ -40,7 +40,7 @@
   （hash、rid、albumId……）都塞进去
 
 完整契约注释见 `plugin-template.js` 与
-`app/src/main/java/com/ella/music/data/sourceplugin/SourcePluginModels.kt` 的文件头。
+`app/src/main/java/com/voxyn/halcyon/data/sourceplugin/SourcePluginModels.kt` 的文件头。
 
 ## 沙箱环境
 

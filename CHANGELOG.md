@@ -64,7 +64,7 @@ From `1.3.0` to `1.3.1` — 列表、自定义分类与文件夹 / lists, custom
 - #750：从 Deeplink、桌面快捷方式、ShortCut 跳转后按返回，回到跳转前页面时记住之前的滚动位置，不再回到顶部。
 - #751：自定义分类允许添加重复的标签键，同名同键的多个分类可以并存，各自独立设置列表样式、分类合集与专辑合并策略。
 - #752：设置 → 音乐库新增「专辑合并策略」：专辑名必选，可再勾选专辑艺术家、艺术家、作曲家、发行时间，所选字段全部相同才算同一张专辑；默认专辑名加专辑艺术家，只影响默认「专辑」分类，改动即时生效、不重新扫描。
-- #753：「自动下载艺术家图片」改为「自动缓存艺术家图片」，设置为「从不」时不再自动下载；搜索图片页点「保存图片」改为跟随「艺术家图片保存路径」，不再写入缓存路径；「艺术家图片缓存路径」默认改为应用内部存储（/storage/emulated/0/Android/data/com.ella.music/files/artist_images/）。
+- #753：「自动下载艺术家图片」改为「自动缓存艺术家图片」，设置为「从不」时不再自动下载；搜索图片页点「保存图片」改为跟随「艺术家图片保存路径」，不再写入缓存路径；「艺术家图片缓存路径」默认改为应用内部存储（/storage/emulated/0/Android/data/com.voxyn.halcyon/files/artist_images/）。
 - #754：艺术家图片搜索结果显示图片分辨率；「所有」标签页按搜索词匹配程度加来源优先级综合排序；支持 deeplink：`halcyon://artist-image-search?source=%s&keyword=%s`，source 可取 qq、netease、kugou、kuwo、spotify、last.fm。
 - #755：关闭「播放页显示收藏按钮」后歌词页收藏按钮同步隐藏，标题副标题右端补上空出的位置；新增「副标题滚动」开关，同时控制播放页与歌词页过长的歌手名；「标题滚动」开关同样作用于歌词页歌名。
 - #756：音乐库页长按迷你播放条定位当前歌曲不再有明显延迟；进入全局搜索页自动弹出输入法不再有明显延迟。
@@ -199,7 +199,7 @@ English
 - #750: Returning from a page opened by a deeplink, launcher shortcut, or app shortcut restores the previous scroll position instead of jumping to the top.
 - #751: Custom categories now accept duplicate tag keys; same-key categories coexist with independent list styles, collections, and album merge rules.
 - #752: New “Album merge rule” setting under Library: album name is mandatory and album artist, artist, composer, and release date can be added — songs count as one album only when every selected field matches. Defaults to name + album artist, affects only the built-in Album category, and applies instantly without a rescan.
-- #753: “Auto download artist images” is renamed “Auto cache artist images” and the Never option now truly skips downloads; Save image on the search page follows the artist image save location instead of the cache path; the cache path defaults to app internal storage (/storage/emulated/0/Android/data/com.ella.music/files/artist_images/).
+- #753: “Auto download artist images” is renamed “Auto cache artist images” and the Never option now truly skips downloads; Save image on the search page follows the artist image save location instead of the cache path; the cache path defaults to app internal storage (/storage/emulated/0/Android/data/com.voxyn.halcyon/files/artist_images/).
 - #754: Artist image results show their resolution; the All tab sorts by keyword match quality then source priority; deeplinks `halcyon://artist-image-search?source=%s&keyword=%s` accept source values qq, netease, kugou, kuwo, spotify, and last.fm.
 - #755: Turning off the player favorite button also hides it on the lyrics page and lets the title/subtitle fill the freed edge; a new “Subtitle scrolling” switch controls long artist names on both pages, and “Title scrolling” now applies to the lyrics page too.
 - #756: Locating the current song after long-pressing the mini player on the library page is no longer visibly delayed, and the global search page's automatic keyboard pop-up is no longer delayed.

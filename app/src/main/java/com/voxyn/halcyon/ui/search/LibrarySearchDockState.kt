@@ -1,0 +1,79 @@
+package com.voxyn.halcyon.ui.search
+
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.staticCompositionLocalOf
+import com.voxyn.halcyon.isSearchRoute
+
+class LibrarySearchDockState(initialQuery: String = "") {
+    var query by mutableStateOf(initialQuery)
+    var autoFocus by mutableStateOf(false)
+    var active by mutableStateOf(false)
+        private set
+    private var owner: Any? = null
+    var selectAll by mutableStateOf(false)
+    var selectionRequestKey by mutableStateOf(0)
+    var onSearch by mutableStateOf<(() -> Unit)?>(null)
+
+    internal fun bind(owner: Any, autoFocus: Boolean, onSearch: () -> Unit) {
+        this.owner = owner
+        this.autoFocus = autoFocus
+        this.onSearch = onSearch
+        active = true
+    }
+
+    internal fun unbind(owner: Any) {
+        if (this.owner !== owner) return
+        this.owner = null
+        active = false
+        autoFocus = false
+        onSearch = null
+    }
+}
+
+val LocalLibrarySearchDockState = staticCompositionLocalOf<LibrarySearchDockState?> { null }
+
+@Composable
+internal fun rememberLibrarySearchDockState(): LibrarySearchDockState {
+    var savedQuery by rememberSaveable { mutableStateOf("") }
+    val state = remember { LibrarySearchDockState(savedQuery) }
+    SideEffect {
+        if (savedQuery != state.query) savedQuery = state.query
+    }
+    return state
+}
+
+internal fun usesSearchBottomDock(
+    currentRoute: String?,
+    mergeSearch: Boolean = false,
+    floatingBottomBar: Boolean = true
+): Boolean = currentRoute.isSearchRoute() && floatingBottomBar && !mergeSearch
+
+internal fun searchDockReturnTabRoute(
+    currentRoute: String?,
+    currentTabRoute: String?,
+    lastTabRoute: String?
+): String? {
+    if (currentRoute.isSearchRoute()) return lastTabRoute ?: currentTabRoute
+    return currentTabRoute ?: lastTabRoute
+}
+
+internal fun applySearchReopenQuery(
+    behavior: Int,
+    currentQuery: String,
+    incomingQuery: String?
+): String {
+    incomingQuery?.trim()?.takeIf { it.isNotBlank() }?.let { return it }
+    return when (behavior) {
+        com.voxyn.halcyon.data.SettingsManager.SEARCH_REOPEN_CLEAR -> ""
+        else -> currentQuery
+    }
+}
+
+internal fun searchReopenSelectsQuery(behavior: Int, query: String): Boolean =
+    behavior == com.voxyn.halcyon.data.SettingsManager.SEARCH_REOPEN_SELECT && query.isNotBlank()
