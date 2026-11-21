@@ -64,6 +64,13 @@ jobs:
             sed -i 's/AndroidVersion.ApiLevel=36/AndroidVersion.ApiLevel=37/' "$ANDROID_HOME/platforms/android-37/source.properties"
           fi
           sdkmanager --channel=3 "build-tools;37.0.0" || sdkmanager "build-tools;36.0.0"
+          if ! sdkmanager --channel=3 "platforms;android-37.2"; then
+            echo "platforms;android-37.2 is unavailable from sdkmanager; deriving it from the CI platform."
+            rm -rf "$ANDROID_HOME/platforms/android-37.2"
+            cp -a "$ANDROID_HOME/platforms/android-37/." "$ANDROID_HOME/platforms/android-37.2/"
+            sed -i 's/AndroidVersion.ApiLevel=37/AndroidVersion.ApiLevel=37.2/' "$ANDROID_HOME/platforms/android-37.2/source.properties"
+            sed -i 's|<api-level>[0-9]*</api-level>|<api-level>37</api-level>|' "$ANDROID_HOME/platforms/android-37.2/package.xml" 2>/dev/null || true
+          fi
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
